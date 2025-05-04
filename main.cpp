@@ -16,6 +16,7 @@ struct PCI_DEVICE_data {
 };
 
 std::string file_reader(const std::string& path) {
+
     std::ifstream file(path);
     if (!file.is_open()) {
         return "";
@@ -38,25 +39,28 @@ std::unordered_map<std::string, std::string> load_pci_ids(const std::string& pat
     std::string current_vendor;
 
     while (std::getline(file, line)) {
-        // Пропускаем пустые строки и комментарии
         if (line.empty() || line[0] == '#') {
             continue;
         }
 
-        // Строка с Vendor (например, "8086  Intel Corporation")
+        // Vendor
         if (line.size() >= 6 && line[4] == ' ') {
-            current_vendor = line.substr(0, 4);  // "8086"
-            pci_db[current_vendor] = line.substr(6);  // "Intel Corporation"
+            current_vendor = line.substr(0, 4);
+            pci_db[current_vendor] = line.substr(6);
         }
-        // Строка с Device (например, "\t1234  Some Device")
+        // Device
         else if (line.size() >= 8 && line[0] == '\t' && line[1] != '\t') {
-            std::string device_id = line.substr(1, 4);  // "1234"
-            std::string key = current_vendor + ":" + device_id;  // "8086:1234"
-            pci_db[key] = line.substr(7);  // "Some Device"
+            std::string device_id = line.substr(1, 4);
+            std::string key = current_vendor + ":" + device_id;
+            pci_db[key] = line.substr(7);
         }
     }
 
     return pci_db;
+}
+
+void mapping_devices() {
+
 }
 
 std::vector<PCI_DEVICE_data> scan_pci_data() {
@@ -82,7 +86,6 @@ std::vector<PCI_DEVICE_data> scan_pci_data() {
         trim_hex(dev.device_id);
         trim_hex(dev.class_code);
 
-        // Получаем названия из pci_db
         if (pci_db.count(dev.vendor_id)) {
             dev.vendor_name = pci_db[dev.vendor_id];
         }
